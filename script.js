@@ -31,9 +31,13 @@ function getSkuFromProductItem(item) {
   return item.querySelector('span.item__sku').innerText;
 }
 
+function saveList() {
+  localStorage.setItem('products', addCart.innerHTML);
+}
+
 function cartItemClickListener(event) {
-  // coloque seu código aqui.
- addCart.removeChild(event.target);
+event.target.remove(event.target);
+saveList();
 }
 
 function emptyCart() {
@@ -50,21 +54,25 @@ function createCartItemElement({ sku, name, salePrice }) {
   return li;
 }
 
-function apiToItem(id, title, thumbnail) {
-  addItens.appendChild(createProductItemElement({ sku: id, name: title, image: thumbnail }));
-}
-
-function apiToCart(id, title, price) {
-  addCart.appendChild(createCartItemElement({ sku: id, name: title, salePrice: price }));
-}
-
 const fetchAddToCart = (itemId) => {
   fetch(`https://api.mercadolibre.com/items/${itemId}`)
   .then((response) => response.json()
   .then((dados) => {
-     [dados].map(({ id, title, price }) => apiToCart(id, title, price));
- }));
+     [dados].map(({ id, title, price }) => { 
+     addCart.appendChild(createCartItemElement({ sku: id, name: title, salePrice: price }));
+     return saveList();
+    });
+  }));
  };
+
+const fetchMercadoLivre = (product) => {
+fetch(`https://api.mercadolibre.com/sites/MLB/search?q=${product}`)
+ .then((response) => response.json()
+ .then((dados) => {
+    dados.results.map(({ id, title, thumbnail }) =>
+    addItens.appendChild(createProductItemElement({ sku: id, name: title, image: thumbnail })));
+}));
+};
 
 const itemListener = () => {
   addItens.addEventListener('click', (event) => { 
@@ -73,15 +81,14 @@ const itemListener = () => {
   }); 
 };
 
-const fetchMercadoLivre = (product) => {
-fetch(`https://api.mercadolibre.com/sites/MLB/search?q=${product}`)
- .then((response) => response.json()
- .then((dados) => {
-    dados.results.map(({ id, title, thumbnail }) => apiToItem(id, title, thumbnail));
-}));
-};
+function loadList() {
+  localStorage.getItem('products');
+  addCart.innerHTML = localStorage.getItem('products');
+  addCart.addEventListener('click', cartItemClickListener);
+}
 
 window.onload = () => { 
   itemListener();
   fetchMercadoLivre('computador');
+  loadList();
  };
