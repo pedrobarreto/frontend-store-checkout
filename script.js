@@ -66,11 +66,13 @@ const fetchAddToCart = (itemId) => {
  };
 
 const fetchMercadoLivre = (product) => {
+addItens.innerHTML = '<h2 class =\'loading\'>Carregando Produtos...</h2>';
 fetch(`https://api.mercadolibre.com/sites/MLB/search?q=${product}`)
  .then((response) => response.json()
  .then((dados) => {
+   addItens.innerHTML = '';
     dados.results.map(({ id, title, thumbnail }) =>
-    addItens.appendChild(createProductItemElement({ sku: id, name: title, image: thumbnail })));
+  addItens.appendChild(createProductItemElement({ sku: id, name: title, image: thumbnail })));
 }));
 };
 
